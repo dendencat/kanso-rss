@@ -39,6 +39,7 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with: { node-version: '24', cache: npm }
       - run: rustup toolchain install 1.90.0 --profile minimal
+      - uses: Swatinem/rust-cache@bc2d2e71bd35c5549942babaa51a89c586b981d1
       - run: rustup target add ${{ matrix.target }}
       - run: npm ci --ignore-scripts
       - run: cargo fetch --locked
@@ -58,6 +59,7 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with: { node-version: '24', cache: npm }
       - run: rustup toolchain install 1.90.0 --profile minimal
+      - uses: Swatinem/rust-cache@bc2d2e71bd35c5549942babaa51a89c586b981d1
       - run: npm ci --ignore-scripts
       - run: cargo fetch --locked
       - run: python3 scripts/licenses.py
