@@ -55,7 +55,7 @@ jobs:
           IOS_MOBILE_PROVISION: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
         run: npx tauri ios build --ci --target aarch64 --export-method app-store-connect -- --locked
         working-directory: apps/native
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: signed-apple-${{ inputs.platform }}
           path: |

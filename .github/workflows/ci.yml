@@ -35,7 +35,7 @@ jobs:
       - run: cargo install cargo-deny --version 0.20.2 --locked
       - run: cargo deny --locked check advisories licenses bans sources
       - run: npm audit --audit-level=high
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
           name: quality-evidence
@@ -69,7 +69,7 @@ jobs:
       - run: python scripts/licenses.py
       - run: npx tauri build --ci --no-sign --target ${{ matrix.target }} -- --locked
         working-directory: apps/native
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: unsigned-native-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/bundle/
@@ -88,7 +88,7 @@ jobs:
         working-directory: apps/native
       - run: cargo check --locked -p kanso-native --lib --target aarch64-apple-ios-sim
       - run: cargo build --locked -p kanso-native --lib --release --target aarch64-apple-ios
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: unsigned-ios-rust-library
           path: target/aarch64-apple-ios/release/libkanso_native.a
