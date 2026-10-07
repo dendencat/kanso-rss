@@ -10,7 +10,7 @@ anyhow.workspace = true
 chrono.workspace = true
 feed-rs.workspace = true
 futures-util.workspace = true
-quick-xml = { version = "0.41", features = ["serialize"] }
+quick-xml = { version = "0.42", features = ["serialize"] }
 reqwest.workspace = true
 rusqlite.workspace = true
 serde.workspace = true
