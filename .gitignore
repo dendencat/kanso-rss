@@ -1,0 +1,14 @@
+/.tools/
+/target/
+/node_modules/
+/apps/native/gen/
+/apps/native/target/
+/dist/
+*.sqlite*
+*.db*
+.env
+!*.example
+/artifacts/
+/.playwright/
+__pycache__/
+*.pyc

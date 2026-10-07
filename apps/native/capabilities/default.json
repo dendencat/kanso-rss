@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "Reader window: built-in core commands only; custom Rust commands validate HTTP links and API paths.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

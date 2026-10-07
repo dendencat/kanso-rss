@@ -1,0 +1,23 @@
+[package]
+name = "kanso-native"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+name = "kanso_native"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+kanso-core = { path = "../../crates/core", version = "0.1.0" }
+kanso-server = { path = "../../crates/server", version = "0.1.0" }
+reqwest.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+url.workspace = true

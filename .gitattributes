@@ -1,0 +1,6 @@
+* text=auto eol=lf
+# Preserve original license bytes: the inventory and fallback manifest hash them.
+licenses/** -text
+*.png binary
+*.ico binary
+*.icns binary

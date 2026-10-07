@@ -1,0 +1,95 @@
+name: Quality and security
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: '24', cache: npm }
+      - run: rustup toolchain install 1.90.0 --profile minimal --component rustfmt,clippy
+      - run: cargo fmt --all -- --check
+      - run: cargo test --locked --workspace --exclude kanso-native
+      - run: cargo clippy --locked --workspace --exclude kanso-native --all-targets -- -D warnings
+      - run: cargo build --locked -p kanso-server -p kanso-cli
+      - run: npm ci --ignore-scripts
+      - run: npm run check:web
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:web
+      - run: python3 scripts/smoke.py
+      - run: python3 scripts/test-backup.py
+      - run: python3 scripts/load-test.py
+      - run: cargo fetch --locked
+      - run: python3 scripts/licenses.py
+      - run: cargo install cargo-deny --version 0.20.2 --locked
+      - run: cargo deny --locked check advisories licenses bans sources
+      - run: npm audit --audit-level=high
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: quality-evidence
+          path: |
+            artifacts/
+            THIRD_PARTY_NOTICES.md
+            licenses/inventory.json
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+          - os: macos-14
+            target: aarch64-apple-darwin
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: '24', cache: npm }
+      - run: rustup toolchain install 1.90.0 --profile minimal --component clippy
+      - run: rustup target add ${{ matrix.target }}
+      - run: npm ci --ignore-scripts
+      - run: cargo clippy --locked -p kanso-native --target ${{ matrix.target }} --all-targets -- -D warnings
+      - run: cargo test --locked --workspace --exclude kanso-native --target ${{ matrix.target }}
+      - run: cargo fetch --locked
+      - run: python scripts/licenses.py
+      - run: npx tauri build --ci --no-sign --target ${{ matrix.target }} -- --locked
+        working-directory: apps/native
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: unsigned-native-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/bundle/
+          if-no-files-found: error
+  ios-compile:
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: '24', cache: npm }
+      - run: rustup toolchain install 1.90.0 --profile minimal
+      - run: rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+      - run: npm ci --ignore-scripts
+      - run: npx tauri ios init --ci
+        working-directory: apps/native
+      - run: cargo check --locked -p kanso-native --lib --target aarch64-apple-ios-sim
+      - run: cargo build --locked -p kanso-native --lib --release --target aarch64-apple-ios
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: unsigned-ios-rust-library
+          path: target/aarch64-apple-ios/release/libkanso_native.a
+          if-no-files-found: error

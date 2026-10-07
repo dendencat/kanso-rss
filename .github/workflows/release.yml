@@ -1,0 +1,82 @@
+name: Release candidates
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  gate:
+    uses: ./.github/workflows/ci.yml
+  version:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - run: python3 scripts/check-version.py
+  binaries:
+    needs: [gate, version]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+          - os: macos-14
+            target: aarch64-apple-darwin
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: '24', cache: npm }
+      - run: rustup toolchain install 1.90.0 --profile minimal
+      - run: rustup target add ${{ matrix.target }}
+      - run: npm ci --ignore-scripts
+      - run: cargo fetch --locked
+      - run: python scripts/licenses.py
+      - run: cargo build --release --locked -p kanso-server -p kanso-cli --target ${{ matrix.target }}
+      - run: python scripts/package-release.py ${{ matrix.target }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-${{ matrix.target }}
+          path: dist/*.zip
+          if-no-files-found: error
+  web:
+    needs: [gate, version]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: '24', cache: npm }
+      - run: rustup toolchain install 1.90.0 --profile minimal
+      - run: npm ci --ignore-scripts
+      - run: cargo fetch --locked
+      - run: python3 scripts/licenses.py
+      - run: npm run web:package
+      - run: cd dist && zip -r kanso-web.zip web
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with: { name: release-web, path: dist/kanso-web.zip }
+  draft:
+    needs: [binaries, web]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with: { pattern: 'release-*', path: release, merge-multiple: true }
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with: { pattern: 'unsigned-native-*', path: native-release }
+      - run: python3 scripts/package-native.py native-release release
+      - run: python3 scripts/checksums.py release
+      - name: Create reviewable release draft
+        env: { GH_TOKEN: '${{ github.token }}', RELEASE_TAG: '${{ github.ref_name }}' }
+        run: gh release create "$RELEASE_TAG" release/* --draft --verify-tag --title "Kanso RSS $RELEASE_TAG" --notes-file docs/release-notes.md

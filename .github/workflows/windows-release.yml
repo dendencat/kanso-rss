@@ -1,0 +1,32 @@
+name: Signed Windows release
+on: { workflow_dispatch: {} }
+permissions: { contents: read }
+jobs:
+  gate:
+    uses: ./.github/workflows/ci.yml
+  windows:
+    needs: gate
+    runs-on: windows-2022
+    environment: windows-release
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: { node-version: '24', cache: npm }
+      - run: rustup toolchain install 1.90.0 --profile minimal
+      - run: npm ci --ignore-scripts
+      - run: cargo fetch --locked
+      - run: python scripts/licenses.py
+      - run: npx tauri build --ci --no-sign -- --locked
+        working-directory: apps/native
+      - name: Sign release installers and executables
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        shell: pwsh
+        run: ./scripts/sign-windows.ps1
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: signed-windows
+          path: target/release/bundle/
+          if-no-files-found: error

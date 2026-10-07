@@ -1,0 +1,17 @@
+{
+  "name": "kanso-rss-tools",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "native": "tauri",
+    "icons": "tauri icon web/icon-source.png -o apps/native/icons",
+    "check:web": "node --check web/app.js && node --check web/sw.js",
+    "test:web": "node scripts/test-web.mjs",
+    "web:package": "python3 scripts/package-web.py"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.0",
+    "@playwright/test": "1.56.1"
+  }
+}

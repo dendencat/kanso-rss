@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1d5f47">
+  <meta name="description" content="Kanso RSS — あなたの情報を、あなたのペースで。">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+  <title>Kanso RSS</title>
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar" aria-label="購読ナビゲーション">
+      <a class="brand" href="./" aria-label="Kanso RSS ホーム"><span class="brand-mark">k</span><span>Kanso<span class="brand-rss">RSS</span></span></a>
+      <p class="eyebrow sidebar-caption">YOUR DAILY PERSPECTIVE</p>
+      <button class="add-subscription" id="add-feed"><span aria-hidden="true">＋</span> 購読を追加</button>
+      <nav class="navigation" aria-label="記事ビュー">
+        <button class="nav-item active" data-view="all"><span class="nav-icon" data-icon="inbox"></span><span>すべての記事</span><span class="count" id="count-all">0</span></button>
+        <button class="nav-item" data-view="unread"><span class="nav-icon" data-icon="circle"></span><span>未読の記事</span><span class="count" id="count-unread">0</span></button>
+        <button class="nav-item" data-view="starred"><span class="nav-icon" data-icon="star"></span><span>スター付き</span><span class="count" id="count-starred">0</span></button>
+      </nav>
+      <div class="section-label"><span>購読フィード</span><button class="icon-button small" id="import-button" title="OPMLをインポート" aria-label="OPMLをインポート" data-icon="import"></button></div>
+      <div id="feed-navigation" class="feed-navigation"></div>
+      <div class="sidebar-bottom">
+        <div class="sync-indicator"><span class="status-dot"></span><span id="sync-label">準備中</span></div>
+        <button class="nav-item" id="settings-button"><span class="nav-icon" data-icon="settings"></span><span>設定と接続</span></button>
+        <a class="license-link" href="licenses.html" target="_blank" rel="noopener noreferrer">ライセンス・クレジット <span>↗</span></a>
+        <div class="profile"><span class="avatar">K</span><div><strong>マイライブラリ</strong><span>あなたの情報を、あなたのペースで。</span></div></div>
+      </div>
+    </aside>
+    <main class="workspace">
+      <header class="topbar">
+        <div class="breadcrumb"><button class="icon-button mobile-menu" id="menu-button" aria-label="ナビゲーションを開く" data-icon="menu"></button><span>ライブラリ</span><span class="breadcrumb-separator">/</span><strong id="breadcrumb-title">すべての記事</strong></div>
+        <div class="topbar-actions"><span class="local-badge" id="mode-label"><span class="status-dot"></span> PRIVATE READER</span><button class="icon-button" id="theme-button" title="カラーテーマを切り替え" aria-label="カラーテーマを切り替え" data-icon="moon"></button></div>
+      </header>
+      <section class="page-heading">
+        <div><p class="eyebrow" id="date-label">YOUR READING SPACE</p><h1 id="view-title">すべての記事<span class="heading-dot">.</span></h1><p class="subtitle" id="view-subtitle">気になる世界を、ひとつの場所に。</p></div>
+        <button class="primary-button refresh-button" id="refresh-button"><span data-icon="refresh"></span><span>フィードを更新</span></button>
+      </section>
+      <section class="reading-space" aria-label="記事一覧と本文">
+        <div class="article-column" id="article-column">
+          <div class="list-toolbar"><label class="search-box"><span data-icon="search"></span><input id="search" type="search" placeholder="記事を検索…" maxlength="256" aria-label="記事を検索"><kbd>/</kbd></label><button class="icon-button" id="mark-read" title="このビューをすべて既読にする" aria-label="このビューをすべて既読にする" data-icon="check-all"></button></div>
+          <div class="list-meta"><span id="list-caption">最新の記事</span><button class="text-button" id="unread-toggle" aria-pressed="false">未読のみ</button></div>
+          <div class="article-list" id="article-list" role="list" aria-label="記事一覧"></div>
+          <button class="load-more" id="load-more" hidden>さらに読み込む</button>
+        </div>
+        <section class="reader" id="reader" aria-label="記事本文">
+          <div class="reader-toolbar"><button class="icon-button reader-back" id="reader-back" title="記事一覧に戻る" aria-label="記事一覧に戻る" data-icon="back"></button><span id="reader-position">READ AT YOUR OWN PACE</span><div class="reader-actions"><button class="icon-button" id="article-read" aria-label="未読にする" title="未読にする" data-icon="circle" disabled></button><button class="icon-button" id="article-star" aria-label="スターを付ける" title="スターを付ける" data-icon="star" disabled></button><button class="icon-button" id="article-open" aria-label="元の記事を開く" title="元の記事を開く" data-icon="external" disabled></button></div></div>
+          <div class="reader-empty" id="reader-empty"><div class="empty-art" aria-hidden="true"><span class="empty-circle"></span><span class="empty-page"><span></span><span></span><span></span></span><span class="empty-leaf">✦</span></div><p class="eyebrow">A LITTLE SPACE TO THINK</p><h2>読む時間を、心地よく。</h2><p>左側の記事を選んで、読み始めましょう。<br>新しい視点が、ここから見つかります。</p><div class="keyboard-hint"><kbd>J</kbd><kbd>K</kbd><span>で記事を移動</span><span class="hint-divider">·</span><kbd>S</kbd><span>でスター</span></div></div>
+          <article class="article-detail" id="article-detail" hidden><div class="article-source"><span class="source-mark" id="detail-source-mark">K</span><span id="detail-source"></span><span class="source-divider">·</span><time id="detail-date"></time></div><h2 id="detail-title"></h2><div class="article-reading-info" id="detail-reading-time"></div><div class="article-body" id="detail-body"></div><button class="original-link" id="detail-original"><span>元の記事を読む</span><span data-icon="external"></span></button><div class="article-end"><span></span><span>✦</span><span></span></div></article>
+        </section>
+      </section>
+      <footer class="workspace-footer"><span>KANSO RSS</span><span>Less noise. More perspective.</span><span id="footer-count">0 フィードを購読中</span></footer>
+    </main>
+  </div>
+  <dialog id="login-dialog" class="dialog"><form id="login-form"><span class="brand-mark dialog-logo">k</span><p class="eyebrow">WELCOME TO KANSO</p><h2>あなたのライブラリへ。</h2><p class="dialog-description">このサーバーのAPIトークンを入力して、読書を始めましょう。</p><label class="field">APIトークン<input id="login-token" type="password" autocomplete="off" minlength="32" maxlength="512" required placeholder="APIトークンを入力"></label><p class="field-note">トークンはこの画面を開いている間だけ保持します。</p><button class="primary-button wide" type="submit">ライブラリを開く <span>→</span></button><p class="form-error" id="login-error" role="alert"></p></form></dialog>
+  <dialog id="feed-dialog" class="dialog"><form id="feed-form"><div class="dialog-top"><p class="eyebrow">EXPAND YOUR PERSPECTIVE</p><button class="icon-button" type="button" data-close="feed-dialog" aria-label="閉じる" data-icon="close"></button></div><h2>新しいフィードを購読。</h2><p class="dialog-description">RSSまたはAtomのURLを追加してください。</p><label class="field">フィードURL<input id="feed-url" type="url" maxlength="2048" required placeholder="https://example.com/feed.xml"></label><label class="field">表示名 <span>任意</span><input id="feed-title" maxlength="256" placeholder="お気に入りのメディア"></label><label class="field">フォルダ <span>任意</span><input id="feed-folder" maxlength="128" placeholder="例：テクノロジー" list="folder-suggestions"><datalist id="folder-suggestions"></datalist></label><button class="primary-button wide" type="submit">購読を追加 <span>＋</span></button><p class="form-error" id="feed-error" role="alert"></p></form></dialog>
+  <dialog id="settings-dialog" class="dialog settings-dialog"><div class="dialog-top"><p class="eyebrow">MAKE IT YOURS</p><button class="icon-button" type="button" data-close="settings-dialog" aria-label="閉じる" data-icon="close"></button></div><h2>設定と接続。</h2><p class="dialog-description" id="connection-description">このサーバーのライブラリを表示しています。</p><div class="settings-section"><h3>ライブラリを持ち運ぶ</h3><div class="settings-buttons"><button class="secondary-button" id="settings-import">OPMLをインポート</button><button class="secondary-button" id="export-button">OPMLをエクスポート</button></div></div><form id="remote-form" hidden><div class="settings-section"><h3>共有サーバーに接続</h3><p class="field-note">同じサーバーに接続すると、端末間で同じ購読・既読状態を使えます。</p><label class="field">サーバーURL<input id="remote-url" type="url" required placeholder="https://rss.example.com"></label><label class="field">APIトークン<input id="remote-token" type="password" required minlength="32" maxlength="512" autocomplete="off"></label><button class="primary-button wide" type="submit">接続する</button><p class="form-error" id="remote-error" role="alert"></p></div></form><div class="settings-section"><h3>購読フィードの管理</h3><div id="manage-feeds"></div></div><button class="secondary-button wide" id="logout-button">接続を解除</button><a class="settings-license" href="licenses.html" target="_blank" rel="noopener noreferrer">オープンソースライセンス ↗</a></dialog>
+  <dialog id="confirm-dialog" class="dialog"><h2 id="confirm-title">確認</h2><p id="confirm-description" class="dialog-description"></p><div class="settings-buttons"><button class="secondary-button" id="confirm-cancel">キャンセル</button><button class="primary-button" id="confirm-ok">実行する</button></div></dialog>
+  <dialog id="export-dialog" class="dialog"><div class="dialog-top"><h2>OPMLエクスポート</h2><button class="icon-button" type="button" data-close="export-dialog" aria-label="閉じる" data-icon="close"></button></div><p class="dialog-description">ファイルとして保存するか、内容をコピーして移行先で読み込めます。</p><textarea id="export-content" readonly aria-label="OPMLの内容"></textarea><div class="settings-buttons"><button class="secondary-button" id="export-copy">コピー</button><button class="primary-button" id="export-download">ファイルを保存</button></div></dialog>
+  <input type="file" id="opml-file" accept=".opml,.xml,text/xml,application/xml" hidden>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

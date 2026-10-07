@@ -1,0 +1,37 @@
+name: kanso
+services:
+  reader:
+    image: ${KANSO_IMAGE:-kanso-server:local}
+    build: { context: .., dockerfile: Dockerfile }
+    restart: unless-stopped
+    init: true
+    read_only: true
+    environment:
+      KANSO_TOKEN: ${KANSO_TOKEN:?Set a generated KANSO_TOKEN}
+    volumes: ["data:/app/data"]
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=16m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128
+    stop_grace_period: 45s
+    logging: { driver: json-file, options: { max-size: 10m, max-file: '3' } }
+  proxy:
+    image: caddy:2.10.2
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      KANSO_DOMAIN: ${KANSO_DOMAIN:?Set KANSO_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      reader: { condition: service_healthy }
+    logging: { driver: json-file, options: { max-size: 10m, max-file: '3' } }
+volumes:
+  data: { name: kanso_data }
+  caddy_data:
+  caddy_config:
