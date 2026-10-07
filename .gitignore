@@ -9,6 +9,7 @@
 .env
 !*.example
 /artifacts/
+/attachments/
 /.playwright/
 __pycache__/
 *.pyc

@@ -1,7 +1,11 @@
 # Kanso RSS
 
+[![Quality and security](https://github.com/dendencat/kanso-rss/actions/workflows/ci.yml/badge.svg)](https://github.com/dendencat/kanso-rss/actions/workflows/ci.yml)
+
 あなたの情報を、あなたのペースで。Rustで実装したRSS/Atomリーダーです。
 Windows、macOS、iOSのアプリとWeb画面、JSON API、CLIを提供します。
+
+[v0.1.0のダウンロード](https://github.com/dendencat/kanso-rss/releases/tag/v0.1.0)。API/CLI、Web、未署名のWindows/macOSアプリを配布します。iOSの署名済みIPAは含みません。
 
 ## 機能
 

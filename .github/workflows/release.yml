@@ -80,6 +80,7 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with: { pattern: 'unsigned-native-*', path: native-release }
       - run: python3 scripts/package-native.py native-release release
+      - run: python3 scripts/check-release.py release
       - run: python3 scripts/checksums.py release
       - name: Create reviewable release draft
         env: { GH_TOKEN: '${{ github.token }}', RELEASE_TAG: '${{ github.ref_name }}' }
