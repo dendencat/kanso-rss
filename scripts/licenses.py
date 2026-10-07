@@ -20,7 +20,7 @@ rows = []
 missing = []
 records = []
 upstream_path = output / "upstream/manifest.json"
-upstream = json.loads(upstream_path.read_text()) if upstream_path.exists() else {}
+upstream = json.loads(upstream_path.read_text(encoding="utf-8")) if upstream_path.exists() else {}
 
 def collect(ecosystem, name, version, license_name, directory, fallback=None):
     if not license_name or license_name == "UNLICENSED":
@@ -52,8 +52,8 @@ def collect(ecosystem, name, version, license_name, directory, fallback=None):
     if name == "libsqlite3-sys":
         amalgamation = directory / "sqlite3/sqlite3.c"
         if amalgamation.exists():
-            text = amalgamation.read_text().split("*/", 1)[0] + "*/\n"
-            (dest / "SQLITE-PUBLIC-DOMAIN.txt").write_text(text)
+            text = amalgamation.read_text(encoding="utf-8").split("*/", 1)[0] + "*/\n"
+            (dest / "SQLITE-PUBLIC-DOMAIN.txt").write_text(text, encoding="utf-8", newline="\n")
     link = dest.relative_to(root).as_posix()
     rows.append(f"| {ecosystem} | `{name}` | {version} | {license_name or 'UNKNOWN'} | [全文]({link}/) |")
     records.append({"ecosystem":ecosystem,"name":name,"version":version,"license":license_name,"files":files,
@@ -71,29 +71,29 @@ for pkg in sorted(metadata["packages"], key=lambda p:(p["name"],p["version"])):
                 shutil.copy2(source, dest / source.name)
         collect("rust",pkg["name"],pkg["version"],pkg.get("license") or ("LicenseRef-Upstream" if pkg.get("license_file") else None),directory)
 
-lock = json.loads((root / "package-lock.json").read_text())
+lock = json.loads((root / "package-lock.json").read_text(encoding="utf-8"))
 for location,pkg in sorted(lock["packages"].items()):
     if not location: continue
     directory = root / location
     # npm optional binaries for other operating systems may not be installed.
     # They are listed in the lockfile; releases regenerate on each target host.
     if not directory.is_dir(): continue
-    package_json = json.loads((directory / "package.json").read_text())
+    package_json = json.loads((directory / "package.json").read_text(encoding="utf-8"))
     name = package_json["name"]
     fallback = root / "node_modules/@tauri-apps/cli" if name.startswith("@tauri-apps/cli-") else None
     collect("npm",name,pkg["version"],package_json.get("license") or pkg.get("license"),directory,fallback)
 
-(root / "THIRD_PARTY_NOTICES.md").write_text("# Third-party notices\n\nKanso RSS uses the following third-party packages. This inventory includes Rust dependencies for all supported targets and installed npm build/test tools. Original copyright and license texts are bundled under `licenses/`. Regenerate on each release host with `python3 scripts/licenses.py`. Uninstalled optional npm binaries are governed by the same upstream Tauri CLI notices.\n\nSQLite is public domain; its upstream blessing is included with libsqlite3-sys. Rust and WebView system runtimes have their own platform licenses. Feed articles remain the property of their respective rights holders.\n\n| Ecosystem | Package | Version | SPDX license | Notices |\n|---|---|---|---|---|\n" + "\n".join(rows) + "\n")
-(output / "inventory.json").write_text(json.dumps(records,ensure_ascii=False,indent=2) + "\n")
+(root / "THIRD_PARTY_NOTICES.md").write_text("# Third-party notices\n\nKanso RSS uses the following third-party packages. This inventory includes Rust dependencies for all supported targets and installed npm build/test tools. Original copyright and license texts are bundled under `licenses/`. Regenerate on each release host with `python3 scripts/licenses.py`. Uninstalled optional npm binaries are governed by the same upstream Tauri CLI notices.\n\nSQLite is public domain; its upstream blessing is included with libsqlite3-sys. Rust and WebView system runtimes have their own platform licenses. Feed articles remain the property of their respective rights holders.\n\n| Ecosystem | Package | Version | SPDX license | Notices |\n|---|---|---|---|---|\n" + "\n".join(rows) + "\n", encoding="utf-8", newline="\n")
+(output / "inventory.json").write_text(json.dumps(records,ensure_ascii=False,indent=2) + "\n", encoding="utf-8", newline="\n")
 if missing:
     raise SystemExit("License generation failed:\n" + "\n".join(missing))
 page = ['<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Third-party licenses — Kanso RSS</title><link rel="stylesheet" href="style.css"></head><body><main class="article-detail"><a href="licenses.html">← ライセンス</a><h2>Third-party licenses</h2><p>配布物の依存パッケージ、ライセンス全文、著作権表示とソースの案内です。</p>']
 for record in records:
     page.append(f'<details><summary>{html.escape(record["name"])} {html.escape(record["version"])} — {html.escape(record["license"] or "UNKNOWN")}</summary><p><a href="{html.escape(record["source_url"],quote=True)}" rel="noopener noreferrer">ソースとパッケージ</a></p>')
     for file in record['files']:
-        content=(root/file['path']).read_text(errors='replace')
+        content=(root/file['path']).read_text(encoding="utf-8", errors='replace')
         page.append(f'<h3>{html.escape(Path(file["path"]).name)}</h3><pre class="license-text">{html.escape(content)}</pre>')
     page.append('</details>')
 page.append('</main></body></html>')
-(root/'web/third-party.html').write_text('\n'.join(page)+'\n')
+(root/'web/third-party.html').write_text('\n'.join(page)+'\n', encoding="utf-8", newline="\n")
 print(f"Generated notices for {len(records)} dependencies")

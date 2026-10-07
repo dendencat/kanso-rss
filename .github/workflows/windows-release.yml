@@ -1,6 +1,8 @@
 name: Signed Windows release
 on: { workflow_dispatch: {} }
 permissions: { contents: read }
+env:
+  PYTHONUTF8: '1'
 jobs:
   gate:
     uses: ./.github/workflows/ci.yml
