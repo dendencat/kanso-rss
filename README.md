@@ -21,7 +21,7 @@ APIサーバーは**個人用の単一ライブラリ**です。トークンを�
 
 ## 起動
 
-Rust 1.90.0、Node.js 24、Python 3.11以降を使用します。Rustのコア・API・CLIはNode.jsなしでビルドできます。
+Rust 1.90.0、Node.js 24.22.1、Python 3.11以降を使用します。Rustのコア・API・CLIはNode.jsなしでビルドできます。
 
 ```bash
 cargo build --locked -p kanso-server -p kanso-cli
@@ -99,3 +99,9 @@ python3 scripts/licenses.py
 ```
 
 依存更新で上流のライセンスファイルが不足した場合は、`scripts/fetch-license-fallbacks.py` で正確な上流リビジョンから補完し、ソースURLとハッシュをレビューしてから保存します。不明なライセンスや全文の欠落はリリースを失敗させます。
+
+## Node.js security update — 2026-10-22
+
+Version 0.1.1 selects Node.js 24.22.1 for build and test tooling. npm installs reject Node.js versions below the fixed patch in the supported 22, 24, and 26 release lines. See the [official October 2026 security release](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases). This configuration update requires rebuilding/restarting any Node.js deployment; it does not verify the runtime of an existing deployment. Dependency declarations and existing lockfile resolutions are unchanged. Verification results and any limitations are recorded below.
+
+Verified on Node.js 24.22.1: locked dependency install (`npm ci --ignore-scripts`), web syntax checks, the browser regression suite, and application/Cargo/Tauri/service-worker version consistency passed. Chromium was downloaded to a temporary directory for the browser test. Rust/native builds, Docker builds, release packaging, and deployed runtimes were not verified.
