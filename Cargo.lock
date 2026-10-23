@@ -2180,7 +2180,7 @@ dependencies = [
 
 [[package]]
 name = "kanso-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -2192,7 +2192,7 @@ dependencies = [
 
 [[package]]
 name = "kanso-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2211,7 +2211,7 @@ dependencies = [
 
 [[package]]
 name = "kanso-native"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "kanso-core",
  "kanso-server",
@@ -2226,7 +2226,7 @@ dependencies = [
 
 [[package]]
 name = "kanso-server"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "axum",

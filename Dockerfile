@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:24-bookworm-slim AS node-tools
+FROM node:24.22.1-bookworm-slim AS node-tools
 FROM rust:1.90.0-slim-bookworm AS build
 COPY --from=node-tools /usr/local/bin/node /usr/local/bin/node
 COPY --from=node-tools /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
